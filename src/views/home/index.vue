@@ -28,6 +28,7 @@
            @ended="endedPlay"
            @play="onPlay"
            @pause="onPause"
+           @canplay="onCanPlay"
            @timeupdate="onTimeUpdate"
            autoplay
            >
@@ -120,7 +121,10 @@ export default {
     handleSearch(){
        this.$router.push({path:'/home/search'})
     },
-
+    onCanPlay(){
+      this.$store.commit('SET_END_STATUS',false)
+      this.$store.commit('SET_PLAY_STATUS',true)
+    },
    //获取歌曲的总时间 
     getAudioDuration(){
 

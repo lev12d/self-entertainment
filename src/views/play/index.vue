@@ -48,17 +48,6 @@
       </span>
     </div>
 
-    <!-- <audio
-      @canplay="getAudio"
-      :src="getSongUrl"
-      autoplay
-      id="audio"
-      ref="audio"
-      @timeupdate="onTimeUpDate"
-      @progress="onProgress"
-      @play="onPlay"
-      @pause="onPause"
-    ></audio>-->
   </div>
 </template>
 
@@ -98,6 +87,9 @@ export default {
     },
     getTotalTime(){
       return this.$store.getters.getDuration
+    },
+    getIsEnded(){
+       return this.$store.getters.getEnded
     }
   },
   methods: {
@@ -115,6 +107,8 @@ export default {
     },
     //转盘是否转动
     isRatote() {
+      //每次判断前更新状态
+      this.getPlayStatus();
       if (this.status) {
         this.$refs.turntable.classList.remove("cd-pause");
         this.$refs.point.style.transform = "rotate(-85deg)";
@@ -123,7 +117,15 @@ export default {
       this.$refs.turntable.classList.add("cd-pause");
       this.$refs.point.style.transform = "rotate(-102deg)";
     },
-
+    //指针移动到转盘
+    pointMoveIn(){
+        this.$refs.turntable.classList.remove("cd-pause");
+        this.$refs.point.style.transform = "rotate(-85deg)";
+    },
+    pointMoveOut(){
+       this.$refs.turntable.classList.add("cd-pause");
+       this.$refs.point.style.transform = "rotate(-102deg)";
+    },
     //点击图标控制播放 暂停
     onPlayControl(iconName, index) {
       //点击前更新状态
@@ -136,8 +138,7 @@ export default {
           //设为暂停
           this.$store.commit("SET_PLAY_STATUS", false);
           //指针添加离开转盘的样式
-          this.$refs.turntable.classList.add("cd-pause");
-          this.$refs.point.style.transform = "rotate(-102deg)";
+          this.pointMoveOut()
           return;
         }
         //如果是暂停状态，点击后，图标设置为播放
@@ -145,8 +146,7 @@ export default {
         //设置为播放
         this.$store.commit("SET_PLAY_STATUS", true);
         //添加指针移动到转盘的样式
-        this.$refs.turntable.classList.remove("cd-pause");
-        this.$refs.point.style.transform = "rotate(-85deg)";
+        this.pointMoveIn()
       }
     },
     //歌曲总时间
@@ -159,11 +159,6 @@ export default {
     },
     //播放时间更新
     onTimeUpDate(t) {
-      //自动播放完了设置暂停
-      if (this.$store.getters.getEnded) {
-        this.$set(this.controlIcons, 2, "zanting");
-         this.$store.commit("SET_PLAY_STATUS", false);
-      }
       let currentTime = parseInt(t);
       let m = parseInt(currentTime / 60) > 0 ? parseInt(currentTime / 60) : 0;
       let s = currentTime > 59 ? Math.floor(currentTime % 60) : currentTime;
@@ -174,6 +169,15 @@ export default {
         Math.ceil((currentTime * 100) / this.$store.getters.getDuration) + "%";
       this.$refs.cur.style.width = this.percentage;
       this.$refs.btn.style.left = this.percentage;
+    },
+    //播放完毕
+    playEnded(){
+      //自动播放完了设置暂停
+        this.$set(this.controlIcons, 2, "zanting");
+        this.pointMoveOut()
+        this.$store.commit("SET_PLAY_STATUS", false);
+        this.isRatote()
+      
     },
     //缓冲
     onProgress() {},
@@ -196,6 +200,11 @@ export default {
        if(newVal != 0 ){
           this.getDuration(newVal)
        }
+    },
+    getIsEnded(newVal){
+        if(newVal){
+            this.playEnded()
+        }
     }
   },
   mounted() {
@@ -216,9 +225,13 @@ export default {
     //图标变化
     if (this.status) {
       this.$set(this.controlIcons, 2, "bofang");
+      this.pointMoveIn()
+      this.isRatote()
       return;
     }
     this.$set(this.controlIcons, 2, "zanting");
+    this.pointMoveIn()
+    this.isRatote()
   }
 };
 </script>
