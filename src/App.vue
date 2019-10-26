@@ -1,7 +1,7 @@
 <template>
   <div id="app">
      <transition name="van-fade" mode="out-in">
-      <keep-alive>
+      <keep-alive :exclude="getNoCacheViews">
         <router-view/>
       </keep-alive>
       </transition>
@@ -10,7 +10,12 @@
 
 <script>
 export default {
-  name: "App"
+  name: "App",
+  computed : {
+    getNoCacheViews(){
+      return this.$store.getters.getNoCacheViews
+    }
+  }
 };
 </script>
 
@@ -22,7 +27,8 @@ export default {
   margin: 0;
   padding: 0;
   list-style: none;
-  text-decoration: none
+  text-decoration: none;
+  box-sizing: border-box
 }
 
 </style>

@@ -1,11 +1,12 @@
 <template>
- <div id="search">
+<div>
+ <div id="search" v-if="getPath == '/home/search'">
   <div id="header">
     <van-search placeholder="请输入搜索关键词" v-model="value" show-action shape="round" class="header">
-      <div slot="action" @click="onSearch">搜索</div>
+      <div slot="action" @click="onSearch" >搜索</div>
     </van-search>
 
-    <van-tabs>
+    <van-tabs title-active-color="#ee0a24">
       <van-tab 
       v-for="(item,index) in tab" 
       :key="index" 
@@ -15,21 +16,27 @@
        
        </van-tab>
     </van-tabs>
-    </div>
-
-   
-  
+    </div> 
  </div>
+ 
+ <!-- --------- -->
+  
+  <keep-alive>
+      <router-view v-if="getPath == '/home/search/player'" :key="getKey"></router-view>
+  </keep-alive>
+
+</div>
 </template>
 
 <script>
+import { Toast } from 'vant'
 import SongList from './components/SongList.vue'
 export default {
   name: "Search",
-  components:{ SongList },
+  components:{ SongList, },
   data() {
     return {
-      value: "",
+      value: "莫再提",
       tab: [
         { name: "单曲" },
         { name: "视频" },
@@ -43,21 +50,37 @@ export default {
       songCount:0
     };
   },
+  computed: {
+       getPath(){
+          return this.$route.fullPath
+       },
+       getKey(){
+          if(JSON.stringify(this.$store.songsDetail)!= '[]'){
+            return this.$store.getters.getSongDetail[0].id 
+          }else{
+            return 1
+          }
+       }
+  },
   methods: {
     onSearch() {
-      console.log(this.value);
       let params = { keywords: this.value };
-      this.axios
-        .get("http://localhost:3000/search", { withCredentials: true, params })
+      this.$api.search.getSongsData("/search",  params )
         .then(res => {
-          console.log(res);
+          // console.log(res);
           if(res.status == 200){
               this.songs = res.data.result.songs
-              this.songCount = res.data.result.songCount
+              this.songCount = res.data.result.songCount;
+              return false;
           }
+        }).catch(err =>{
+        // Toast(`${err.status}:${err.statusText}`)
         });
-    }
-  }
+    },
+
+  
+  },
+
 };
 </script>
 

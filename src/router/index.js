@@ -17,12 +17,23 @@ export default new Router({
     {
       path: '/home',
       name: 'Home',
-      component: () => import('@/views/home/index.vue')
+      component: () => import('@/views/home/index.vue'),
+      children:[
+        {
+          path: 'search',
+          name :'Search',
+          component: () => import('@/views/search/index.vue'),
+          children : [
+            {
+              path: 'player',
+              name :'Player',
+              component: () => import('@/views/play/index.vue')
+            }
+          ]
+        }
+      ]
     },
-    {
-      path: '/search',
-      name :'Search',
-      component: () => import('@/views/search/index.vue')
-    }
+    
+    
   ]
 })
